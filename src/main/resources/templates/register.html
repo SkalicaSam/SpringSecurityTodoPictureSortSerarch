@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Registrace uživatele</title>
+    <meta charset="UTF-8" />
+</head>
+<body>
+<h1>Registrace</h1>
+
+    <div th:if="${errorMessage}" style="color: red;">
+        <p th:text="${errorMessage}"></p>
+    </div>
+
+    <div th:if="${successMessage}" style="color: green;">
+        <p th:text="${successMessage}"></p>
+        <script>
+            // Redirect to /login after 5 seconds
+            setTimeout(function() {
+                window.location.href = '/login';
+            }, 5000);
+        </script>
+    </div>
+
+
+<form th:action="@{/register}" method="post">
+    <label for="username">Uživatelské jméno:</label><br/>
+    <input type="text" id="username" name="username" required/><br/><br/>
+
+    <label for="password">Heslo:</label><br/>
+    <input type="password" id="password" name="password" required/><br/><br/>
+
+    <button type="submit">Registrovat</button>
+</form>
+</body>
+</html>
