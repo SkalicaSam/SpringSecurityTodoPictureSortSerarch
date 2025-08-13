@@ -9,13 +9,31 @@
 <div class="container py-5">
     <h1 class="mb-4" th:text="${task.id} == null ? 'Create New Task' : 'Edit Task'">Task Form</h1>
 
-    <form th:action="${task.id} == null ? @{/tasks} : @{'/tasks/update/' + ${task.id}}" th:object="${task}" method="post" class="needs-validation" novalidate>
+    <form th:action="${task.id} == null ? @{/tasks} : @{'/tasks/update/' + ${task.id}}" th:object="${task}" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
         <div class="mb-3">
             <label for="description" class="form-label">Description</label>
             <input type="text" th:field="*{description}" id="description" class="form-control" placeholder="Enter task description" required />
             <div class="invalid-feedback">
                 Please provide a description.
             </div>
+        </div>
+
+        <div th:if="${task.images != null}">
+            <label>Existing Images:</label>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <div th:each="image, iterStat : ${task.images}" style="position: relative;">
+                    <img th:src="@{'/images/' + ${image.id}}" alt="Image" style="max-height: 80px; max-width: 80px; object-fit: cover; border-radius: 4px;" />
+                    <div>
+                        <input type="checkbox" th:id="'deleteImage' + ${iterStat.index}" th:name="deleteImageIds" th:value="${image.id}" />
+                        <label th:for="'deleteImage' + ${iterStat.index}">Delete</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="images" class="form-label">Add New Images</label>
+            <input type="file" id="images" name="images" multiple class="form-control" />
         </div>
 
         <div class="form-check mb-3">

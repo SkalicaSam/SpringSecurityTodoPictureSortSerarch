@@ -1,15 +1,21 @@
 package com.example.securitydemo.controller;
 
+import com.example.securitydemo.dto.TaskDTO;
+import com.example.securitydemo.model.Image;
 import com.example.securitydemo.model.Task;
 import com.example.securitydemo.model.User;
+import com.example.securitydemo.repository.ImageRepository;
 import com.example.securitydemo.repository.TaskRepository;
 import com.example.securitydemo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -21,6 +27,9 @@ public class TaskController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ImageRepository imageRepository;
 
     @GetMapping
     public String listTasks(Model model, Principal principal) {
@@ -37,11 +46,37 @@ public class TaskController {
     }
 
     @PostMapping
-    public String createTask(@ModelAttribute Task task, Principal principal) {
+    public String createTask(@ModelAttribute TaskDTO taskDTO,
+//                             @RequestParam("images") MultipartFile[] images,
+                             Principal principal)  throws IOException {
         User user = userRepository.findByUsername(principal.getName());
-        task.setUser(user);
+        Task task = new Task();
+        task.setDescription(taskDTO.getDescription());
         task.setCompleted(false);
+        task.setUser(user);
+
+
+        // Save task first to get ID
         taskRepository.save(task);
+
+        // Save images
+        MultipartFile[] images = taskDTO.getImages();
+        if (images != null && images.length > 0) {
+            List<Image> imageList = new ArrayList<>();
+            for (MultipartFile file : images) {
+                if (!file.isEmpty()) {
+                    Image image = new Image();
+                    image.setFilename(file.getOriginalFilename());
+                    image.setContentType(file.getContentType());
+                    image.setData(file.getBytes());
+                    image.setTask(task);
+                    imageList.add(image);
+                }
+            }
+            imageRepository.saveAll(imageList);
+            task.setImages(imageList);
+            taskRepository.save(task);
+        }
         return "redirect:/tasks";
     }
 
@@ -56,13 +91,50 @@ public class TaskController {
     }
 
     @PostMapping("/update/{id}")
-    public String updateTask(@PathVariable Long id, @ModelAttribute Task task, Principal principal) {
+    public String updateTask(@PathVariable Long id,
+                             @ModelAttribute TaskDTO taskDTO,
+//                             @RequestParam("images") MultipartFile[] images,
+                             Principal principal) throws IOException {
         Task existingTask = taskRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid task Id:" + id));
         if (!existingTask.getUser().getUsername().equals(principal.getName())) {
             return "redirect:/tasks"; // prevent updating others' tasks
         }
-        existingTask.setDescription(task.getDescription());
-        existingTask.setCompleted(task.isCompleted());
+        existingTask.setDescription(taskDTO.getDescription());
+        existingTask.setCompleted(taskDTO.isCompleted());
+
+        // Delete selected images
+        Long[] deleteImageIds = taskDTO.getDeleteImageIds();
+        if (deleteImageIds != null) {
+            List<Image> images = existingTask.getImages();
+            images.removeIf(image -> {
+                for (Long deleteId : deleteImageIds) {
+                    if (image.getId().equals(deleteId)) {
+                        imageRepository.delete(image);
+                        return true; // remove from collection
+                    }
+                }
+                return false;
+            });
+        }
+
+        // Add new images
+        MultipartFile[] images = taskDTO.getImages();
+        if (images != null && images.length > 0) {
+            List<Image> imageList = existingTask.getImages() != null ? existingTask.getImages() : new ArrayList<>();
+            for (MultipartFile file : images) {
+                if (!file.isEmpty()) {
+                    Image image = new Image();
+                    image.setFilename(file.getOriginalFilename());
+                    image.setContentType(file.getContentType());
+                    image.setData(file.getBytes());
+                    image.setTask(existingTask);
+                    imageList.add(image);
+                }
+            }
+            imageRepository.saveAll(imageList);
+            existingTask.setImages(imageList);
+        }
+
         taskRepository.save(existingTask);
         return "redirect:/tasks";
     }

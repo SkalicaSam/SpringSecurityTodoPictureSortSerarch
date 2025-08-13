@@ -1,6 +1,9 @@
 package com.example.securitydemo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+
+import java.util.List;
 
 @Entity
 @Table(name = "tasks")
@@ -13,6 +16,10 @@ public class Task {
     private String description;
 
     private boolean completed;
+
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+//    /
+    private List<Image> images;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "username")
@@ -42,6 +49,14 @@ public class Task {
 
     public void setCompleted(boolean completed) {
         this.completed = completed;
+    }
+
+    public List<Image> getImages() {
+        return images;
+    }
+
+    public void setImages(List<Image> images) {
+        this.images = images;
     }
 
     public User getUser() {
