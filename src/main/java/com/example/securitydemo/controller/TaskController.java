@@ -15,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.domain.Sort;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -39,10 +40,14 @@ public class TaskController {
                         @RequestParam(required = false) String description,
                         @RequestParam(required = false) Boolean completed,
                             @RequestParam(defaultValue = "0") int page,
-                            @RequestParam(defaultValue = "5") int size) {
+                            @RequestParam(defaultValue = "5") int size,
+                            @RequestParam(defaultValue = "id") String sortField,
+                            @RequestParam(defaultValue = "asc") String sortDir
+                        ) {
         User user = userRepository.findByUsername(principal.getName());
 
-        Pageable pageable = PageRequest.of(page, size);
+        Sort sort = sortDir.equalsIgnoreCase("asc") ? Sort.by(sortField).ascending() : Sort.by(sortField).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
         Page<Task> taskPage = taskRepository.findByUserAndDescriptionAndCompleted(user, description, completed, pageable);
 
         model.addAttribute("tasks", taskPage.getContent());
@@ -51,6 +56,10 @@ public class TaskController {
         model.addAttribute("filterDescription", description != null ? description : "");
         model.addAttribute("filterCompleted", completed);
         model.addAttribute("pageSize", size);
+        model.addAttribute("sortField", sortField);
+        model.addAttribute("sortDir", sortDir);
+        model.addAttribute("reverseSortDir", sortDir.equals("asc") ? "desc" : "asc");
+
         return "tasks";
     }
 
