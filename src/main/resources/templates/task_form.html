@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Task Form</title>
+    <meta charset="UTF-8" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body class="bg-light">
+<div class="container py-5">
+    <h1 class="mb-4" th:text="${task.id} == null ? 'Create New Task' : 'Edit Task'">Task Form</h1>
+
+    <form th:action="${task.id} == null ? @{/tasks} : @{'/tasks/update/' + ${task.id}}" th:object="${task}" method="post" class="needs-validation" novalidate>
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <input type="text" th:field="*{description}" id="description" class="form-control" placeholder="Enter task description" required />
+            <div class="invalid-feedback">
+                Please provide a description.
+            </div>
+        </div>
+
+        <div class="form-check mb-3">
+            <input type="checkbox" th:field="*{completed}" id="completed" class="form-check-input" />
+            <label for="completed" class="form-check-label">Completed</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a href="/tasks" class="btn btn-secondary ms-2">Cancel</a>
+    </form>
+</div>
+
+<script>
+    // Bootstrap form validation
+    (() => {
+        'use strict'
+        const forms = document.querySelectorAll('.needs-validation')
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+</script>
+
+</body>
+</html>
