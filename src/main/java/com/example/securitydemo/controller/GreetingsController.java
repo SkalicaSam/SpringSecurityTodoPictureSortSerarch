@@ -74,4 +74,9 @@ public class GreetingsController {
         return "register";
     }
 
+    @GetMapping("/login")
+    public String login() {
+        return "login"; // Thymeleaf template name for login page
+    }
+
 }

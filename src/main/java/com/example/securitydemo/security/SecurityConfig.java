@@ -43,6 +43,12 @@ public class SecurityConfig {
 //        http.formLogin(withDefaults());//  builded login page
 //        http.httpBasic(withDefaults());   // with login popup // // HTTP Basic authentication with session support
 
+        http.formLogin(form -> form
+                .loginPage("/login")  // specify custom login page URL
+                .permitAll()
+                .defaultSuccessUrl("/hello", true)
+        );
+
 
         // Přidání podpory pro odhlášení
         http.logout(logout -> logout
