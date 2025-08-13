@@ -32,10 +32,14 @@ public class TaskController {
     private ImageRepository imageRepository;
 
     @GetMapping
-    public String listTasks(Model model, Principal principal) {
+    public String listTasks(Model model, Principal principal,
+                        @RequestParam(required = false) String description,
+                        @RequestParam(required = false) Boolean completed) {
         User user = userRepository.findByUsername(principal.getName());
-        List<Task> tasks = taskRepository.findByUser(user);
+        List<Task> tasks = taskRepository.findByUserAndDescriptionAndCompleted(user, description, completed);
         model.addAttribute("tasks", tasks);
+        model.addAttribute("filterDescription", description != null ? description : "");
+        model.addAttribute("filterCompleted", completed);
         return "tasks";
     }
 
