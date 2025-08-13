@@ -10,9 +10,10 @@
     <h1 class="mb-4" th:text="${task.id} == null ? 'Create New Task' : 'Edit Task'">Task Form</h1>
 
     <form th:action="${task.id} == null ? @{/tasks} : @{'/tasks/update/' + ${task.id}}" th:object="${task}" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+
         <div class="mb-3">
             <label for="description" class="form-label">Description</label>
-            <input type="text" th:field="*{description}" id="description" class="form-control" placeholder="Enter task description" required />
+            <input type="text" th:field="*{description}" id="description" class="form-control" placeholder="Enter task description" required maxlength="255" />
             <div class="invalid-feedback">
                 Please provide a description.
             </div>
