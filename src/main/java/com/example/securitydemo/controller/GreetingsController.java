@@ -10,6 +10,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+
 @Controller
 public class GreetingsController {
 
@@ -29,6 +31,16 @@ public class GreetingsController {
     public String sayHello(@RequestParam(required = false) String continueParam) {
         return "Hello";
     }
+
+    @GetMapping("/helloname")
+    public String sayHello(Model model, Principal principal) {
+        String username = principal.getName(); // get logged-in username
+        model.addAttribute("username", username);
+        return "helloName"; // Thymeleaf template name
+    }
+
+
+
 
 
 //    @PreAuthorize("hasRole('ADMIN')")
