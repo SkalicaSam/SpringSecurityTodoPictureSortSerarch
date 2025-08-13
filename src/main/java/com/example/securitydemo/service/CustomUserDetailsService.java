@@ -24,12 +24,16 @@ public class CustomUserDetailsService implements UserDetailsService {
         if(user == null){
             throw new UsernameNotFoundException("User not found");
         }
+        Set<SimpleGrantedAuthority> authorities = user.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority(role))
+                .collect(Collectors.toSet());
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
                 user.isEnabled(),
                 true, true, true,
-                Set.of(new SimpleGrantedAuthority("ROLE_USER"))
+                authorities
+//                Set.of(new SimpleGrantedAuthority("ROLE_USER"))
         );
     }
 }

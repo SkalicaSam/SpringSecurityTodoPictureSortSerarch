@@ -11,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.Set;
 
 @Controller
 public class GreetingsController {
@@ -40,13 +41,10 @@ public class GreetingsController {
     }
 
 
-
-
-
-//    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/admin")
-    public String adminEdnpoint(){
-        return "Hello, admin";
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/adminp")
+    public String adminPage(){
+        return "admin";
     }
 
     @PostMapping("/register")
@@ -62,6 +60,7 @@ public class GreetingsController {
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(password));
         user.setEnabled(true);
+        user.setRoles(Set.of("ROLE_USER"));
 
         userRepository.save(user);
 

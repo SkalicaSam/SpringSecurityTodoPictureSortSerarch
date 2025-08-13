@@ -14,7 +14,10 @@ public class User {
 
     private boolean enabled;
 
-
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_roles")
+    @Column(name = "role")
+    private Set<String> roles;
 
     // getters and setters
 
@@ -41,6 +44,15 @@ public class User {
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
+
+    public Set<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<String> roles) {
+        this.roles = roles;
+    }
+
 
 
 }

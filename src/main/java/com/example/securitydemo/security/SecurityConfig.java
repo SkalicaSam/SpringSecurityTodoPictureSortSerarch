@@ -32,6 +32,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests((requests) ->
                 requests.requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/register", "/register/**").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")  // protect admin endpoints
                         .anyRequest().authenticated());
 
 //        Remove stateless session management to enable session support
