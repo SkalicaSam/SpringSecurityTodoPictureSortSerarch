@@ -8,6 +8,9 @@ import com.example.securitydemo.repository.ImageRepository;
 import com.example.securitydemo.repository.TaskRepository;
 import com.example.securitydemo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -34,12 +37,20 @@ public class TaskController {
     @GetMapping
     public String listTasks(Model model, Principal principal,
                         @RequestParam(required = false) String description,
-                        @RequestParam(required = false) Boolean completed) {
+                        @RequestParam(required = false) Boolean completed,
+                            @RequestParam(defaultValue = "0") int page,
+                            @RequestParam(defaultValue = "5") int size) {
         User user = userRepository.findByUsername(principal.getName());
-        List<Task> tasks = taskRepository.findByUserAndDescriptionAndCompleted(user, description, completed);
-        model.addAttribute("tasks", tasks);
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Task> taskPage = taskRepository.findByUserAndDescriptionAndCompleted(user, description, completed, pageable);
+
+        model.addAttribute("tasks", taskPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", taskPage.getTotalPages());
         model.addAttribute("filterDescription", description != null ? description : "");
         model.addAttribute("filterCompleted", completed);
+        model.addAttribute("pageSize", size);
         return "tasks";
     }
 
